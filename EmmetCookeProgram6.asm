@@ -8,6 +8,17 @@ INCLUDE Irvine32.inc
 
 ; (insert constant definitions here)
 
+getString MACRO buffer
+ENDM
+
+displayString MACRO buffer
+	push	edx
+	mov		edx, OFFSET buffer
+	call	WriteString
+	call	Crlf
+	pop		edx
+ENDM
+
 .data
 	; Strings for the introduction
 	programTitle	BYTE	"Program 6A:  Read and Write Ints with Macros",0
@@ -16,18 +27,16 @@ INCLUDE Irvine32.inc
 					BYTE	"checks whether those are valid numbers. Once the correct number", 0ah
 					BYTE	"has been entered, they are printed with their total sum and average.",0
 
+	; String to get number from the user
+	getNumber		BYTE	"Please enter an unsigned integer: ",0
+	errorMessage	BYTE	"Error. Please try again.",0
+
 .code
 main PROC
 	; Introduce the Programmer and Program
-	mov		edx, OFFSET programTitle
-	call	WriteString
-	call	Crlf
-	mov		edx, OFFSET programmerName
-	call	WriteString
-	call	Crlf
-	mov		edx, OFFSET programDesc
-	call	WriteString
-	call	Crlf
+	displayString	programTitle
+	displayString	programmerName
+	displayString	programDesc
 
 
 
@@ -37,3 +46,4 @@ main ENDP
 ; (insert additional procedures here)
 
 END main
+

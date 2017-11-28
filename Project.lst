@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/27/17 16:45:16
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 11:38:30
 (EmmetCookeProgram6.asm				     Page 1 - 1
 
 
@@ -28,6 +28,17 @@ Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/27/17 16:45:16
 			      C 
 
 				; (insert constant definitions here)
+
+				getString MACRO buffer
+				ENDM
+
+				displayString MACRO buffer
+					push	edx
+					mov		edx, OFFSET buffer
+					call	WriteString
+					call	Crlf
+					pop		edx
+				ENDM
 
  00000000			.data
 					; Strings for the introduction
@@ -89,28 +100,56 @@ Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/27/17 16:45:16
  00000000			.code
  00000000			main PROC
 					; Introduce the Programmer and Program
- 00000000  BA 00000000 R		mov		edx, OFFSET programTitle
- 00000005  E8 00000000 E		call	WriteString
- 0000000A  E8 00000000 E		call	Crlf
- 0000000F  BA 0000002D R		mov		edx, OFFSET programmerName
- 00000014  E8 00000000 E		call	WriteString
- 00000019  E8 00000000 E		call	Crlf
- 0000001E  BA 00000045 R		mov		edx, OFFSET programDesc
- 00000023  E8 00000000 E		call	WriteString
- 00000028  E8 00000000 E		call	Crlf
+					;mov		edx, OFFSET programTitle
+					;call	WriteString
+					;call	Crlf
+					;mov		edx, OFFSET programmerName
+					;call	WriteString
+					;call	Crlf
+					;mov		edx, OFFSET programDesc
+					;call	WriteString
+					;call	Crlf
+					displayString	programTitle
+ 00000000  52		     1		push	edx
+ 00000001  BA 00000000 R     1		mov		edx, OFFSET programTitle
+ 00000006  E8 00000000 E     1		call	WriteString
+ 0000000B  E8 00000000 E     1		call	Crlf
+ 00000010  5A		     1		pop		edx
+					displayString	programmerName
+ 00000011  52		     1		push	edx
+ 00000012  BA 0000002D R     1		mov		edx, OFFSET programmerName
+ 00000017  E8 00000000 E     1		call	WriteString
+ 0000001C  E8 00000000 E     1		call	Crlf
+ 00000021  5A		     1		pop		edx
+					displayString	programDesc
+ 00000022  52		     1		push	edx
+ 00000023  BA 00000045 R     1		mov		edx, OFFSET programDesc
+ 00000028  E8 00000000 E     1		call	WriteString
+ 0000002D  E8 00000000 E     1		call	Crlf
+ 00000032  5A		     1		pop		edx
+
+
 
 					exit	; exit to operating system
- 0000002D  6A 00	   *	    push   +000000000h
- 0000002F  E8 00000000 E   *	    call   ExitProcess
- 00000034			main ENDP
+ 00000033  6A 00	   *	    push   +000000000h
+ 00000035  E8 00000000 E   *	    call   ExitProcess
+ 0000003A			main ENDP
 
 				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/27/17 16:45:16
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 11:38:30
 (EmmetCookeProgram6.asm				     Symbols 2 - 1
 
 
+
+
+Macros:
+
+                N a m e                 Type
+
+displayString  . . . . . . . . .	Proc
+getString  . . . . . . . . . . .	Proc
 
 
 Structures and Unions:
@@ -202,7 +241,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000107 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000034 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000003A Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -309,7 +348,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000034 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000003A Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
