@@ -8,22 +8,30 @@ INCLUDE Irvine32.inc
 
 ; (insert constant definitions here)
 
-getString MACRO prompt, error, userVar
-	push			ecx
-	push			edx
-	displayString	prompt
-	mov				edx, OFFSET userVar
-	mov				ecx, (SIZEOF userVar) - 1
-	call			ReadString
-	pop				edx
-	pop				ecx
-ENDM
-
+;-------------------------------------
+; Macro to display a string
+;-------------------------------------
 displayString MACRO buffer
 	push	edx
-	mov		edx, OFFSET buffer
+	mov		edx, buffer
 	call	WriteString
 	pop		edx
+ENDM
+
+;-------------------------------------
+; Macro to get a string input from the
+; user that will be converted to an
+; unsigned int
+;-------------------------------------
+getString MACRO prompt, userVar, varSize
+	push			edx
+	push			ecx
+	displayString	prompt
+	mov				edx, userVar
+	mov				ecx, varSize
+	call			ReadString
+	pop				ecx
+	pop				edx
 ENDM
 
 .data
@@ -40,20 +48,25 @@ ENDM
 	userInput		BYTE	32	DUP(?)
 	userNumber		DWORD	?
 
+	numArray		DWORD	10	DUP(?)
+
 .code
 main PROC
 	; Introduce the Programmer and Program
-	displayString	programTitle
-	call			Crlf
-	displayString	programmerName
-	call			Crlf
-	displayString	programDesc
-	call			Crlf
+	push			OFFSET programTitle
+	push			OFFSET programmerName
+	push			OFFSET programDesc
+	call			introduceProgrammer
 
-	; TEST
-	getString		getNumber, errorMessage, userInput
+	; Get the numbers from the user
+	push			OFFSET userInput		; +20
+	push			SIZEOF userInput		; +16
+	push			OFFSET getNumber		; +12
+	push			OFFSET errorMessage		; +8
+	call			readVal
 
-	displayString	userInput
+
+	displayString	OFFSET userInput
 
 	exit	; exit to operating system
 main ENDP
@@ -65,8 +78,19 @@ main ENDP
 ; preconditions: 
 ; registers changed: 
 ;-------------------------------------
-ReadVal PROC
-ReadVal ENDP
+introduceProgrammer PROC
+	push			ebp
+	mov				ebp, esp
+	displayString	[ebp+16]
+	call			Crlf
+	displayString	[ebp+12]
+	call			Crlf
+	displayString	[ebp+8]
+	call			Crlf
+	pop				ebp
+	ret
+introduceProgrammer ENDP
+
 
 ;-------------------------------------
 ; Procedure 
@@ -75,8 +99,28 @@ ReadVal ENDP
 ; preconditions: 
 ; registers changed: 
 ;-------------------------------------
-WriteVal PROC
-WriteVal ENDP
+readVal PROC
+	push		ebp
+	mov			ebp, esp
+
+	mov			eax, [ebp+20]
+	mov			ecx, [ebp+16]
+	mov			edx, [ebp+12]
+
+	getString	edx, eax, ecx
+	pop			ebp
+	ret
+readVal ENDP
+
+;-------------------------------------
+; Procedure 
+; recieves: 
+; returns: 
+; preconditions: 
+; registers changed: 
+;-------------------------------------
+writeVal PROC
+writeVal ENDP
 
 END main
 

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 12:07:35
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 14:15:58
 (EmmetCookeProgram6.asm				     Page 1 - 1
 
 
@@ -29,29 +29,30 @@ Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 12:07:35
 
 				; (insert constant definitions here)
 
-				getString MACRO prompt, error, userVar
-					push			ecx
-					push			edx
-
-				getUserInput:
-					displayString	prompt
-					mov				edx, OFFSET userVar
-					mov				ecx, (SIZEOF userVar) - 1
-					call			ReadString
-
-				;getStringErrorMessage:
-					;displayString	error
-
-				endGetString:
-					pop				edx
-					pop				ecx
-				ENDM
-
+				;-------------------------------------
+				; Macro to display a string
+				;-------------------------------------
 				displayString MACRO buffer
 					push	edx
-					mov		edx, OFFSET buffer
+					mov		edx, buffer
 					call	WriteString
 					pop		edx
+				ENDM
+
+				;-------------------------------------
+				; Macro to get a string input from the
+				; user that will be converted to an
+				; unsigned int
+				;-------------------------------------
+				getString MACRO prompt, userVar
+					push			edx
+					push			ecx
+					displayString	prompt
+					mov				edx, userVar
+					mov				ecx, (SIZEOF userVar) - 1
+					call			ReadString
+					pop				ecx
+					pop				edx
 				ENDM
 
  00000000			.data
@@ -129,53 +130,36 @@ Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 12:07:35
 	   ]
  00000163 00000000			userNumber		DWORD	?
 
+ 00000167  0000000A [			numArray		DWORD	10	DUP(?)
+	    00000000
+	   ]
+
  00000000			.code
  00000000			main PROC
 					; Introduce the Programmer and Program
-					displayString	programTitle
- 00000000  52		     1		push	edx
- 00000001  BA 00000000 R     1		mov		edx, OFFSET programTitle
- 00000006  E8 00000000 E     1		call	WriteString
- 0000000B  5A		     1		pop		edx
- 0000000C  E8 00000000 E		call			Crlf
-					displayString	programmerName
- 00000011  52		     1		push	edx
- 00000012  BA 0000002D R     1		mov		edx, OFFSET programmerName
- 00000017  E8 00000000 E     1		call	WriteString
- 0000001C  5A		     1		pop		edx
- 0000001D  E8 00000000 E		call			Crlf
-					displayString	programDesc
- 00000022  52		     1		push	edx
- 00000023  BA 00000045 R     1		mov		edx, OFFSET programDesc
- 00000028  E8 00000000 E     1		call	WriteString
- 0000002D  5A		     1		pop		edx
- 0000002E  E8 00000000 E		call			Crlf
+ 00000000  68 00000000 R		push			OFFSET programTitle
+ 00000005  68 0000002D R		push			OFFSET programmerName
+ 0000000A  68 00000045 R		push			OFFSET programDesc
+ 0000000F  E8 00000029			call			introduceProgrammer
 
-					getString		getNumber, errorMessage, userInput
- 00000033  51		     1		push			ecx
- 00000034  52		     1		push			edx
- 00000035		     1	getUserInput:
- 00000035  52		     2		push	edx
- 00000036  BA 00000107 R     2		mov		edx, OFFSET getNumber
- 0000003B  E8 00000000 E     2		call	WriteString
- 00000040  5A		     2		pop		edx
- 00000041  BA 00000143 R     1		mov				edx, OFFSET userInput
- 00000046  B9 0000001F	     1		mov				ecx, (SIZEOF userInput) - 1
- 0000004B  E8 00000000 E     1		call			ReadString
- 00000050		     1	endGetString:
- 00000050  5A		     1		pop				edx
- 00000051  59		     1		pop				ecx
+					; Get the numbers from the user
+ 00000014  68 00000143 R		push			OFFSET userInput		; +20
+ 00000019  6A 20			push			SIZEOF userInput		; +16
+ 0000001B  68 00000107 R		push			OFFSET getNumber		; +12
+ 00000020  68 0000012A R		push			OFFSET errorMessage		; +8
+ 00000025  E8 00000045			call			readVal
 
-					displayString	userInput
- 00000052  52		     1		push	edx
- 00000053  BA 00000143 R     1		mov		edx, OFFSET userInput
- 00000058  E8 00000000 E     1		call	WriteString
- 0000005D  5A		     1		pop		edx
+
+					displayString	OFFSET userInput
+ 0000002A  52		     1		push	edx
+ 0000002B  BA 00000143 R     1		mov		edx, OFFSET userInput
+ 00000030  E8 00000000 E     1		call	WriteString
+ 00000035  5A		     1		pop		edx
 
 					exit	; exit to operating system
- 0000005E  6A 00	   *	    push   +000000000h
- 00000060  E8 00000000 E   *	    call   ExitProcess
- 00000065			main ENDP
+ 00000036  6A 00	   *	    push   +000000000h
+ 00000038  E8 00000000 E   *	    call   ExitProcess
+ 0000003D			main ENDP
 
 				;-------------------------------------
 				; Procedure 
@@ -184,8 +168,31 @@ Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 12:07:35
 				; preconditions: 
 				; registers changed: 
 				;-------------------------------------
- 00000065			ReadVal PROC
- 00000065			ReadVal ENDP
+ 0000003D			introduceProgrammer PROC
+ 0000003D  55				push			ebp
+ 0000003E  8B EC			mov				ebp, esp
+					displayString	[ebp+16]
+ 00000040  52		     1		push	edx
+ 00000041  8B 55 10	     1		mov		edx, [ebp+16]
+ 00000044  E8 00000000 E     1		call	WriteString
+ 00000049  5A		     1		pop		edx
+ 0000004A  E8 00000000 E		call			Crlf
+					displayString	[ebp+12]
+ 0000004F  52		     1		push	edx
+ 00000050  8B 55 0C	     1		mov		edx, [ebp+12]
+ 00000053  E8 00000000 E     1		call	WriteString
+ 00000058  5A		     1		pop		edx
+ 00000059  E8 00000000 E		call			Crlf
+					displayString	[ebp+8]
+ 0000005E  52		     1		push	edx
+ 0000005F  8B 55 08	     1		mov		edx, [ebp+8]
+ 00000062  E8 00000000 E     1		call	WriteString
+ 00000067  5A		     1		pop		edx
+ 00000068  E8 00000000 E		call			Crlf
+ 0000006D  5D				pop				ebp
+ 0000006E  C3				ret
+ 0000006F			introduceProgrammer ENDP
+
 
 				;-------------------------------------
 				; Procedure 
@@ -194,12 +201,46 @@ Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 12:07:35
 				; preconditions: 
 				; registers changed: 
 				;-------------------------------------
- 00000065			WriteVal PROC
- 00000065			WriteVal ENDP
+ 0000006F			readVal PROC
+ 0000006F  55				push		ebp
+ 00000070  8B EC			mov			ebp, esp
+
+ 00000072  8B 45 14			mov			eax, [ebp+20]
+ 00000075  8B 4D 10			mov			ecx, [ebp+16]
+ 00000078  8B 55 0C			mov			edx, [ebp+12]
+
+					getString	edx, eax
+ 0000007B  52		     1		push			edx
+ 0000007C  51		     1		push			ecx
+ 0000007D  52		     2		push	edx
+ 0000007E  8B D2	     2		mov		edx, edx
+ 00000080  E8 00000000 E     2		call	WriteString
+ 00000085  5A		     2		pop		edx
+ 00000086  8B D0	     1		mov				edx, eax
+			     1		mov				ecx, (SIZEOF eax) - 1
+EmmetCookeProgram6.asm(110) : error A2009:syntax error in expression
+ getString(5): Macro Called From
+  EmmetCookeProgram6.asm(110): Main Line Code
+ 00000088  E8 00000000 E     1		call			ReadString
+ 0000008D  59		     1		pop				ecx
+ 0000008E  5A		     1		pop				edx
+ 0000008F  5D				pop			ebp
+ 00000090  C3				ret
+ 00000091			readVal ENDP
+
+				;-------------------------------------
+				; Procedure 
+				; recieves: 
+				; returns: 
+				; preconditions: 
+				; registers changed: 
+				;-------------------------------------
+ 00000091			writeVal PROC
+ 00000091			writeVal ENDP
 
 				END main
 
-Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 12:07:35
+Microsoft (R) Macro Assembler Version 14.10.25019.0	    11/28/17 14:15:58
 (EmmetCookeProgram6.asm				     Symbols 2 - 1
 
 
@@ -301,8 +342,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000167 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000065 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000018F Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000009C Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -372,7 +413,6 @@ ReadInt  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 ReadKeyFlush . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadKey  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 ReadString . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-ReadVal  . . . . . . . . . . . .	P Near	 00000065 _TEXT	Length= 00000000 Public STDCALL
 SetConsoleCursorInfo . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleCursorPosition . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 SetConsoleMode . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -409,13 +449,13 @@ WriteStackFrameName  . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-WriteVal . . . . . . . . . . . .	P Near	 00000065 _TEXT	Length= 00000000 Public STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000065 Public STDCALL
-  getUserInput . . . . . . . . .	L Near	 00000035 _TEXT	
-  endGetString . . . . . . . . .	L Near	 00000050 _TEXT	
+introduceProgrammer  . . . . . .	P Near	 0000003D _TEXT	Length= 00000032 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000003D Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+readVal  . . . . . . . . . . . .	P Near	 0000006F _TEXT	Length= 0000002D Public STDCALL
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+writeVal . . . . . . . . . . . .	P Near	 0000009C _TEXT	Length= 00000000 Public STDCALL
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -648,6 +688,7 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
+numArray . . . . . . . . . . . .	DWord	 00000167 _DATA	
 programDesc  . . . . . . . . . .	Byte	 00000045 _DATA	
 programTitle . . . . . . . . . .	Byte	 00000000 _DATA	
 programmerName . . . . . . . . .	Byte	 0000002D _DATA	
@@ -659,4 +700,4 @@ wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
 
 	   0 Warnings
-	   0 Errors
+	   1 Errors
